@@ -79,7 +79,10 @@ app.get('/movies/search/:limit?/:metascore?', (req, res) => {
 
 });
 
-
+// post a movie review (don't work)
+app.post("/movies/:id", (request, response) => {      
+  data.push({"id" : request.params.id} ,{'$set': {"data":request.body.date, "review":request.body.review}});
+});
 
 app.listen(port);
 console.log(`GraphQL Server Running at localhost:${port}`);
