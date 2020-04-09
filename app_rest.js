@@ -3,8 +3,42 @@ var bodyParser = require("body-parser");
 const data = require('./movies');
 const app = express();
 const port = 9292;
+const {MongoClient} = require('mongodb');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+async function start (actor = DENZEL_IMDB_ID, metascore = METASCORE) { //modified version of sandbox.js that writes movies of an actor to a json file
+  try {
+    const movies = await imdb(actor);
+    console.log(JSON.stringify(movies, null, 2));
+	fs.writeFileSync('denzel_movies.json', JSON.stringify(movies) );
+    process.exit(0);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+}
+
+
+async function main(){
+
+  const uri = "mongodb+srv://FABB:11021102@cluster0-07fid.mongodb.net/test?retryWrites=true&w=majority";
+  const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+  try {
+
+      await client.connect();
+
+      await  listDatabases(client);
+
+  } catch (e) {
+      console.error(e);
+  } finally {
+      await client.close();
+  }
+}
+
+main().catch(console.error);
 
 // return a random number between 0 and max
 function random_int(max) {
@@ -36,14 +70,14 @@ function limit_list(list_movie, limit){
   }
 }
 
-// list all movies
+// Populate the database
 app.get('/movies', (req, res) => {
   res.status(200).send({
     movies: data
   })
 });
 
-// display a random must-watch movie
+// Fetch a random must-watch movie
 app.get('/movies/must_watch', (req, res) => {
   let must_watch = [];
 
@@ -56,7 +90,7 @@ app.get('/movies/must_watch', (req, res) => {
   res.status(200).send({movie: must_watch[rand_number],});
 });
 
-// display a movie by his id
+// Fetch a specific movie
 app.get('/movies/:id', (req, res) => {  
     const id = req.params.id; 
     data.map((movie) => {  
@@ -67,7 +101,7 @@ app.get('/movies/:id', (req, res) => {
   return res.status(404).send({ success: 'false',   message: 'movie does not exist',  });
 });
 
-// display a movie by his id
+// Search for Denzel's movies
 app.get('/movies/search/:limit?/:metascore?', (req, res) => {  
   const limit = req.params.limit;
   const metascore = req.params.metascore;
@@ -85,4 +119,3 @@ app.post("/movies/:id", (request, response) => {
 });
 
 app.listen(port);
-console.log(`GraphQL Server Running at localhost:${port}`);
