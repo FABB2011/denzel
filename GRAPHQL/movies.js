@@ -1,4 +1,4 @@
-const movies_list =  [
+let movies_list =  [
     {
         "link": "https://www.imdb.com/title/tt10095582/?ref_=nm_flmg_act_1",
         "id": "tt10095582",

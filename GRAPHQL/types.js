@@ -1,4 +1,4 @@
-    const {
+const {
     GraphQLObjectType,
     GraphQLString,
     GraphQLInt,
